@@ -1,2 +1,2 @@
-# divya_project
+# ClearSkies
 HCI 584 Project
