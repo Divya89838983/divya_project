@@ -1,1 +1,1 @@
-print("Hello GitHub! This is my first commit.")
+print("Hello GitHub! This is my first pull request.")
