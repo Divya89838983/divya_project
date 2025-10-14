@@ -103,9 +103,6 @@ def O3(val):
 complete_data = pd.read_csv('dummy_air_quality.csv')
 
 def read_pollution_data_from_api():
-
-    # params = {"lat": 50, "lon":50}
-    # headers = {"Authorization": "Bearer "+API_KEY}  # if needed
     url = "http://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=37.61&lon=122.38&appid=35f1ed7f152fe596d9684a0b73a60a9b"
     response = requests.get(url)
     air_pollution_data_json = response.json()
@@ -123,71 +120,10 @@ def convert_json_to_object(air_pollution_json_data):
     ]
     return AirQualityResponse(coord=coord, list=air_quality_list) 
 
-
-print("**********")
 air_pollution_json_data = read_pollution_data_from_api()
 air_pollution_object_data = convert_json_to_object(air_pollution_json_data)
 print("*******")
-# print(air_pollution_object_data.coord.lat)    
-# print(air_pollution_object_data.coord.lon)     # 12.97
+print(air_pollution_object_data.coord.lat)    
+print(air_pollution_object_data.coord.lon)    
 print(air_pollution_object_data.list)
-
-
-# all_stations = complete_data.iloc[1931:] if len(complete_data) > 1931 else complete_data.copy()
-# # Convert 'From Date' to datetime
-# all_stations['Date'] = pd.to_datetime(all_stations['From Date'], format='%Y-%m-%d')
-# # Drop original date columns
-# all_stations.drop(columns=['From Date', 'To Date'], inplace=True)
-# # Check result
-# print(all_stations.head())
-
-# stations = all_stations.columns.get_level_values(0).unique().tolist()[1:-1]
-# print("stations")
-# print(stations)
-
-
-# # Assume all_stations already has a 'Date' column
-# stations = all_stations['Location'].unique()
-# all_data = pd.DataFrame()
-# all_data['Date'] = all_stations['Date'].unique()  # dates
-
-# for station in stations:
-#     station_data = all_stations[all_stations['Location'] == station].reset_index(drop=True)
-#     all_data[(station, 'PM2.5')] = station_data['PM2.5(ug/m3)'].apply(PM25)
-#     all_data[(station, 'PM10')] = station_data['PM10(ug/m3)'].apply(PM10)
-#     all_data[(station, 'NO2')] = station_data['NO2(ug/m3)'].apply(NO2)
-#     all_data[(station, 'SO2')] = station_data['SO2(ug/m3)'].apply(SO2)
-#     all_data[(station, 'CO')] = station_data['CO(mg/m3)'].apply(CO)
-#     all_data[(station, 'O3')] = station_data['Ozone(ug/m3)'].apply(O3)
-
-# # Optional: convert columns to MultiIndex
-# # After filling all_data
-# all_data.columns = pd.MultiIndex.from_tuples(
-#     [('Date', '')] + [col for col in all_data.columns if isinstance(col, tuple)]
-# )
-
-# top_pollutants_by_station = {}
-
-# for station in stations:
-#     level_columns = all_data[station]
-#     correlation_matrix = level_columns.corr()
-#     top_pollutants = correlation_matrix.abs().sum().nlargest(4).index 
-#     top_pollutants_by_station[station] = list(top_pollutants)
-
-# print("top pollutant by station")
-
-# print(top_pollutants_by_station)
-
-
-
-
-# stations = complete_data['Location'].unique()
-# for station in stations:
-#     station_data = complete_data[complete_data['Location'] == station]
-#     print(station, station_data.shape)
-#     station_data['Date']
-
-    
-
-
 print('*********')
