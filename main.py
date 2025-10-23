@@ -4,7 +4,9 @@
 import pandas as pd
 import requests
 from air_quality_models import AirQualityResponse, Coordinates, Components, AirQualityData, Main
-
+from datetime import datetime
+import matplotlib.pyplot as plt
+from module.keys import appid
 
 def PM25(val):
     if val<=30:
@@ -100,10 +102,14 @@ def O3(val):
     elif val>1288:
         return 500
     
-complete_data = pd.read_csv('dummy_air_quality.csv')
+# complete_data = pd.read_csv('dummy_air_quality.csv')
 
+
+'''
+read_pollution_data_from_api() needs to get lat,long,pollution type and appid as arguments
+'''
 def read_pollution_data_from_api():
-    url = "http://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=37.61&lon=122.38&appid=35f1ed7f152fe596d9684a0b73a60a9b"
+    url = f"http://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=37.61&lon=122.38&appid={appid}"
     response = requests.get(url)
     air_pollution_data_json = response.json()
     return air_pollution_data_json
@@ -127,3 +133,24 @@ print(air_pollution_object_data.coord.lat)
 print(air_pollution_object_data.coord.lon)    
 print(air_pollution_object_data.list)
 print('*********')
+
+
+
+# print out data for each time slice 
+print("DateTime, AQI, PM2.5, PM10, NO2, SO2, CO, O3")
+for d in air_pollution_object_data.list:
+    dt_human = datetime.fromtimestamp(d.dt) # convert to human-readable format
+    print(dt_human, d.main.aqi, d.components.pm2_5, PM25(d.components.pm2_5), d.components.pm10, PM10(d.components.pm10), d.components.no2, NO2(d.components.no2), d.components.so2, SO2(d.components.so2), d.components.co, CO(d.components.co), d.components.o3, O3(d.components.o3))
+print('*********')
+
+# Plot AQI over time
+dates = [datetime.fromtimestamp(d.dt) for d in air_pollution_object_data.list]
+aqi_values = [d.main.aqi for d in air_pollution_object_data.list] # extract AQI values
+plt.plot(dates, aqi_values, marker='o')
+plt.xlabel('DateTime')  
+plt.ylabel('AQI')
+plt.title('Air Quality Index (AQI) Over Time')
+plt.xticks(rotation=90)
+plt.grid()
+plt.tight_layout()
+plt.show()
