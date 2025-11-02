@@ -1,14 +1,15 @@
 import requests
 
-def geocode_location(location):
+def get_coordinates_from_location(location_name):
     """
-    Geocode a location using OpenStreetMap Nominatim API
+    Get latitude and longitude from location name (e.g., "San Francisco", "Ames, IA", "Paris, France")
+    using OpenStreetMap's Nominatim API
     
     Args:
-        location (str): Location to geocode (e.g., "Ames, IA")
+        location_name (str): Location to geocode
     
     Returns:
-        dict: Dictionary containing lat, lon, or None if error
+        tuple: ((latitude, longitude), display_name) or ((None, None), None) if not found
     """
 
     # Nominatim API endpoint
@@ -16,14 +17,15 @@ def geocode_location(location):
     
     # Parameters for the API request
     params = {
-        'q': location,           # Query string
-        'format': 'json',        # Response format
-        'limit': 1               # Limit to 1 result
+        'q': location_name,
+        'format': 'json',
+        'limit': 1,
+        'addressdetails': 1
     }
     
     # Set a proper User-Agent header (required by Nominatim)
     headers = {
-        'User-Agent': 'GeoCodingScript/1.0 (student.project@example.com)'
+        'User-Agent': 'AirQualityApp/1.0'  
     }
     
 
@@ -35,35 +37,32 @@ def geocode_location(location):
         # Parse the JSON response
         data = response.json()
         
-        if data:
+        if data and len(data) > 0:
             result = data[0]  # Get the first (best) result
-            return {
-                'latitude': float(result['lat']),
-                'longitude': float(result['lon']),
-            }
+            display_name = result.get('display_name', 'Unknown')
+            lat = float(result['lat'])
+            lon = float(result['lon'])
+            return (lat, lon), display_name
         else:
-            return None
+            print(f"No results found for location: {location_name}")
+            return (None, None), None
             
     except requests.exceptions.RequestException as e:
-        print(f"Error making request: {e}")
-        return None
+        print(f"Error fetching coordinates: {e}")
+        return (None, None), None
     except (KeyError, ValueError, IndexError) as e:
         print(f"Error parsing response: {e}")
-        return None
-            
-  
+        return (None, None), None
 
 # Example usage
 if __name__ == "__main__":
-    # Geocode Ames, IA
+    # Test with a sample location
     location = "Ames, IA"
-    result = geocode_location(location)
+    (lat, lon), display_name = get_coordinates_from_location(location)
     
-    if result:
-        print(f"Location: {location}")
-        print(f"Latitude: {result['latitude']}")
-        print(f"Longitude: {result['longitude']}")
-        
+    if lat is not None and lon is not None:
+        print(f"Found location: {display_name}")
+        print(f"Coordinates: {lat}, {lon}")
     else:
         print(f"Could not geocode location: {location}")
     
