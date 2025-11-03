@@ -3,7 +3,7 @@ Functions for interacting with OpenWeatherMap's Air Quality API.
 """
 
 import requests
-from air_quality_models import AirQualityResponse, Coordinates, Components, AirQualityData, Main
+from .air_quality_models import AirQualityResponse, Coordinates, Components, AirQualityData, Main
 from keys import appid
 
 def read_pollution_data_from_api(lat, lon):

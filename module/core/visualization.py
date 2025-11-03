@@ -4,7 +4,7 @@ Functions for visualizing air quality data using Plotly.
 
 from datetime import datetime
 import plotly.graph_objects as go
-from aqi_calculators import calculate_all_aqi_values
+from .aqi_calculators import calculate_all_aqi_values
 
 def plot_max_aqi_over_time(dates, max_aqi_values, location):
     """

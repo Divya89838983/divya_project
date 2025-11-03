@@ -3,6 +3,17 @@ Functions for converting raw pollutant measurements to standardized AQI values.
 Each function converts a specific pollutant's concentration to the 0-500 AQI scale.
 """
 
+def calculate_all_aqi_values(components):
+    """Calculate AQI values for all pollutants."""
+    return [
+        PM25(components.pm2_5),
+        PM10(components.pm10),
+        NO2(components.no2),
+        SO2(components.so2),
+        CO(components.co),
+        O3(components.o3)
+    ]
+
 def PM25(val):
     if val<=30:
         return round(val*(50/30), 2)
@@ -85,34 +96,16 @@ def CO(val):
         return 500
 
 def O3(val):
-    if val<=100:
+    """Calculate AQI for O3 (Ozone)."""
+    if val <= 100:
         return round(val, 2)
-    elif val>100 and val<=168:
+    elif val <= 168:
         return round(100 + (val-100)*(100/68), 2)
-    elif val>168 and val<=208:
+    elif val <= 208:
         return round(200 + (val-168)*(100/40), 2)
-    elif val>208 and val<=748:
+    elif val <= 748:
         return round(300 + (val-208)*(100/540), 2)
-    elif val>748 and val<=1288:
-        return round(400 +(val-748)*(100/540), 2)
-    elif val>1288:
+    elif val <= 1288:
+        return round(400 + (val-748)*(100/540), 2)
+    else:
         return 500
-
-def calculate_all_aqi_values(components):
-    """
-    Calculate AQI values for all pollutants from a components object
-    
-    Args:
-        components: Components object containing pollutant measurements
-        
-    Returns:
-        list: AQI values for all pollutants [PM2.5, PM10, NO2, SO2, CO, O3]
-    """
-    return [
-        PM25(components.pm2_5),
-        PM10(components.pm10),
-        NO2(components.no2),
-        SO2(components.so2),
-        CO(components.co),
-        O3(components.o3)
-    ]

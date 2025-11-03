@@ -1,9 +1,9 @@
 # Main script for Air Quality Index analysis and visualization
 
-from geocoding import get_coordinates_from_location
-from air_quality_api import read_pollution_data_from_api, convert_json_to_object
-from aqi_calculators import calculate_all_aqi_values
-from visualization import calculate_max_aqi_over_time, plot_max_aqi_over_time
+from module.core.geocoding import get_coordinates_from_location
+from module.core.air_quality_api import read_pollution_data_from_api, convert_json_to_object
+from module.core.aqi_calculators import calculate_all_aqi_values
+from module.core.visualization import calculate_max_aqi_over_time, plot_max_aqi_over_time
 
 def main():
     """

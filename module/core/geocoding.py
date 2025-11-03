@@ -65,5 +65,3 @@ if __name__ == "__main__":
         print(f"Coordinates: {lat}, {lon}")
     else:
         print(f"Could not geocode location: {location}")
-    
-    
