@@ -3,6 +3,7 @@ Location handling module for the Air Quality Analysis application.
 """
 import streamlit as st
 import requests
+import pandas as pd
 
 def get_coordinates_from_location(location_name):
     """Get coordinates from location name using Nominatim API."""
@@ -29,11 +30,12 @@ def display_location_info(lat, lon, display_name):
     """Display location information in the Streamlit UI."""
     st.success(f"📍 Found location: {display_name}")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.info(f"Latitude: {lat}")
-    with col2:
-        st.info(f"Longitude: {lon}")
+    map_data = pd.DataFrame({
+        'lat': [lat],
+        'lon': [lon],
+        'size': [100]  # Larger marker size
+    })
+    st.map(map_data, zoom=11, size='size', use_container_width=True)
 
 def get_location_data():
     """Get location data from user input."""

@@ -24,11 +24,11 @@ def get_aqi_ranges():
     """Get the AQI ranges and their corresponding colors."""
     return [
         (0, 50, 'Good', '#00e400'),
-        (51, 100, 'Moderate', '#ffff00'),
-        (101, 150, 'Unhealthy for Sensitive Groups', '#ff7e00'),
-        (151, 200, 'Unhealthy', '#ff0000'),
-        (201, 300, 'Very Unhealthy', '#8f3f97'),
-        (301, 500, 'Hazardous', '#7e0023')
+        (50, 100, 'Moderate', '#ffff00'),
+        (100, 150, 'Unhealthy for Sensitive Groups', '#ff7e00'),
+        (150, 200, 'Unhealthy', '#ff0000'),
+        (200, 300, 'Very Unhealthy', '#8f3f97'),
+        (300, 500, 'Hazardous', '#7e0023')
     ]
 
 def create_aqi_plot(dates, max_aqi_values, display_name):
@@ -52,6 +52,8 @@ def create_aqi_plot(dates, max_aqi_values, display_name):
     
     for start, end, label, color in relevant_ranges:
         actual_end = min(end, y_max)
+        # Convert to integer for display purposes
+        display_end = int(actual_end)
         fig.add_trace(
             go.Scatter(
                 x=dates + dates[::-1],
@@ -60,11 +62,24 @@ def create_aqi_plot(dates, max_aqi_values, display_name):
                 fillcolor=f'rgba{tuple(list(int(color.lstrip("#")[i:i+2], 16) for i in (0, 2, 4)) + [0.1])}',
                 line=dict(width=0),
                 showlegend=True,
-                name=f'{label} ({start}-{actual_end})',
+                name=f'{label} ({start}-{display_end})',
                 hoverinfo='skip'
             )
         )
-    
+
+    # Create color list for markers
+    color_list = []
+    for aqi in max_aqi_values:
+        matched = False
+        for start, end, _, color in aqi_ranges:
+            if start <= aqi <= end:
+                marker_color = color
+                matched = True
+                break
+        if not matched:
+            print(f"Warning: No AQI range matched for value {aqi:.2f}")
+        color_list.append(marker_color)
+
     # Add AQI line
     fig.add_trace(
         go.Scatter(
@@ -75,8 +90,7 @@ def create_aqi_plot(dates, max_aqi_values, display_name):
             line=dict(width=3, color='black'),
             marker=dict(
                 size=8,
-                color=[next(color for start, end, _, color in aqi_ranges if start <= aqi <= end)
-                       for aqi in max_aqi_values],
+                color=color_list,
                 line=dict(width=1, color='black')
             ),
             hovertemplate='<b>%{x}</b><br>Max AQI: %{y:.1f}<br>Level: %{customdata}<extra></extra>',
@@ -135,4 +149,4 @@ def display_aqi_forecast(air_pollution_data, display_name, calculate_all_aqi_val
     st.subheader("📈 Air Quality Forecast")
     dates, max_aqi_values = calculate_aqi_over_time(air_pollution_data.list, calculate_all_aqi_values)
     fig = create_aqi_plot(dates, max_aqi_values, display_name)
-    st.plotly_chart(fig, width='stretch')
+    st.plotly_chart(fig, use_container_width=True)
