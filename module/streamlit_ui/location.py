@@ -50,8 +50,10 @@ def get_location_data():
     )
     
     if location:
-        # Get coordinates
-        (lat, lon), display_name = get_coordinates_from_location(location)
+        # Show loading spinner while fetching coordinates
+        with st.spinner("🔍 Searching for location..."):
+            # Get coordinates
+            (lat, lon), display_name = get_coordinates_from_location(location)
         
         if lat and lon:
             display_location_info(lat, lon, display_name)
