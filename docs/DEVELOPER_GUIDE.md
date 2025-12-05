@@ -115,6 +115,46 @@ divya_project/
    
    ⚠️ **Note**: This file is gitignored and won't be committed.
 
+---
+
+## How to Run
+
+### Start the Application
+
+1. **Activate your virtual environment** (if you created one):
+   ```bash
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+2. **Run the Streamlit app**:
+   ```bash
+   streamlit run app.py
+   ```
+
+3. **Access the application**:
+   - Open your browser and go to: `http://localhost:8501`
+   - The app should automatically open in your default browser
+
+### Using the Application
+
+1. Enter a location (e.g., "Paris, France" or "New York, USA")
+2. Press Enter or click outside the input box
+3. View the air quality data with:
+   - Current pollutant levels (PM2.5, PM10, O3, NO2, SO2, CO)
+   - AQI values and categories
+   - Interactive map showing the location
+   - 5-day forecast charts
+
+### Running on a Different Port
+
+If port 8501 is already in use:
+```bash
+streamlit run app.py --server.port 8080
+```
+
+### Stopping the Application
+
+Press `Ctrl + C` in the terminal to stop the server.
 
 ---
 
