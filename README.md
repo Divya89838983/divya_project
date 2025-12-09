@@ -370,15 +370,29 @@ See `requirements.txt` for complete list with versions.
 
 ## 📸 Screenshots
 
-**Note:** Screenshots should be added here showing:
-1. Location search input
-2. Location confirmation with map
-3. Current air quality pollutant cards
-4. Overall AQI display
-5. Interactive forecast chart
-6. Different AQI categories (Good, Moderate, Unhealthy examples)
+### 1. Location Search Input
 
-*To add screenshots: Take screenshots while using the app and add them to this README. In GitHub's web editor, simply drag and drop image files into the markdown.*
+![Location Search](images/location_search.png)
+
+*The main interface with location input box*
+
+### 2. Location Confirmation with Map
+
+![Location Map](images/location_map.png)
+
+*Map showing the searched location with confirmation message*
+
+### 3. Current Air Quality Dashboard
+
+![Air Quality Dashboard](images/air_quality_dashboard.png)
+
+*Complete dashboard showing individual pollutant cards with AQI values, raw concentrations, color-coded categories, and overall AQI status*
+
+### 4. Interactive Forecast Chart
+
+![Forecast Chart](images/forecast_chart.png)
+
+*5-day AQI forecast with interactive Plotly visualization and color-coded zones*
 
 ---
 
