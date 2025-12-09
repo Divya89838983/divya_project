@@ -1,27 +1,46 @@
 """
-Plotting module for the Air Quality Analysis application.
-Contains functions for creating and displaying AQI plots and visualizations.
+AQI forecast visualization with Plotly.
+
+Creates interactive time series plots showing maximum AQI over time
+with color-coded EPA category zones.
 """
+
 import streamlit as st
 import plotly.graph_objects as go
 from datetime import datetime
 
+
 def calculate_aqi_over_time(air_quality_list, calculate_all_aqi_values):
-    """Calculate maximum AQI values over time."""
+    """Extract max AQI for each forecast timestamp.
+    
+    Args:
+        air_quality_list: List of AirQualityData objects
+        calculate_all_aqi_values: Function to compute AQI values
+    
+    Returns:
+        tuple: (dates, max_aqi_values) as lists
+    """
     dates = []
     max_aqi_values = []
     
-    for d in air_quality_list:
-        dt_human = datetime.fromtimestamp(d.dt)
+    for data_point in air_quality_list:
+        dt_human = datetime.fromtimestamp(data_point.dt)
         dates.append(dt_human)
-        aqi_values = calculate_all_aqi_values(d.components)
+        
+        # Get AQI for all pollutants and take maximum
+        aqi_values = calculate_all_aqi_values(data_point.components)
         max_aqi = max(aqi_values)
         max_aqi_values.append(max_aqi)
     
     return dates, max_aqi_values
 
+
 def get_aqi_ranges():
-    """Get the AQI ranges and their corresponding colors."""
+    """EPA AQI category definitions.
+    
+    Returns:
+        list: Tuples of (min, max, label, hex_color)
+    """
     return [
         (0, 50, 'Good', '#00e400'),
         (50, 100, 'Moderate', '#ffff00'),
@@ -31,20 +50,30 @@ def get_aqi_ranges():
         (300, 500, 'Hazardous', '#7e0023')
     ]
 
+
 def create_aqi_plot(dates, max_aqi_values, display_name):
-    """Create a Plotly figure for AQI visualization."""
+    """Build Plotly figure with AQI forecast and colored zones.
+    
+    Args:
+        dates: List of datetime objects
+        max_aqi_values: List of AQI values
+        display_name: Location name for title
+    
+    Returns:
+        plotly.graph_objects.Figure
+    """
     aqi_ranges = get_aqi_ranges()
     
-    # Calculate plot range
+    # Set y-axis range to fit data with 10% padding
     max_observed_aqi = max(max_aqi_values)
     y_max = min(max_observed_aqi * 1.1, 500)
     
-    # Create plot
     fig = go.Figure()
     
-    # Add colored range areas
+    # Add colored background zones for relevant AQI categories
     relevant_ranges = [r for r in aqi_ranges if r[0] <= y_max]
     if not any(r[1] >= y_max for r in relevant_ranges):
+        # Partial range at top if y_max cuts through a category
         for start, end, label, color in aqi_ranges:
             if start <= y_max <= end:
                 relevant_ranges.append((start, y_max, label, color))
@@ -52,8 +81,9 @@ def create_aqi_plot(dates, max_aqi_values, display_name):
     
     for start, end, label, color in relevant_ranges:
         actual_end = min(end, y_max)
-        # Convert to integer for display purposes
         display_end = int(actual_end)
+        
+        # Create filled area using polygon technique
         fig.add_trace(
             go.Scatter(
                 x=dates + dates[::-1],
@@ -67,7 +97,7 @@ def create_aqi_plot(dates, max_aqi_values, display_name):
             )
         )
 
-    # Create color list for markers
+    # Assign marker colors based on AQI category
     color_list = []
     for aqi in max_aqi_values:
         matched = False
@@ -76,11 +106,11 @@ def create_aqi_plot(dates, max_aqi_values, display_name):
                 marker_color = color
                 matched = True
                 break
-        if not matched:
-            print(f"Warning: No AQI range matched for value {aqi:.2f}")
+        if not matched:  # GOTCHA: Handle edge cases above 500
+            marker_color = '#7e0023'  # Default to Hazardous
         color_list.append(marker_color)
 
-    # Add AQI line
+    # Add main AQI trend line with colored markers
     fig.add_trace(
         go.Scatter(
             x=dates,
@@ -99,7 +129,7 @@ def create_aqi_plot(dates, max_aqi_values, display_name):
         )
     )
     
-    # Update layout
+    # Configure layout
     fig.update_layout(
         title=f'Maximum Air Quality Index Forecast - {display_name}',
         xaxis_title='DateTime',
@@ -112,7 +142,7 @@ def create_aqi_plot(dates, max_aqi_values, display_name):
             yanchor="top",
             y=0.99,
             xanchor="left",
-            x=1.02
+            x=1.02  # Position legend outside plot area
         ),
         yaxis=dict(
             range=[0, y_max],
@@ -121,15 +151,23 @@ def create_aqi_plot(dates, max_aqi_values, display_name):
         )
     )
     
-    # Add gridlines
+    # Add subtle gridlines
     fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='rgba(128,128,128,0.2)')
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(128,128,128,0.2)')
     
     return fig
 
+
 def display_current_air_quality(air_pollution_data, calculate_all_aqi_values):
-    """Display current air quality metrics."""
+    """Show current AQI metrics in a 3-column grid.
+    
+    Args:
+        air_pollution_data: AirQualityResponse object
+        calculate_all_aqi_values: AQI calculation function
+    """
     st.subheader("📊 Current Air Quality")
+    
+    # Use first data point (current conditions)
     components = air_pollution_data.list[0].components
     aqi_values = calculate_all_aqi_values(components)
     pollutant_names = ['PM2.5', 'PM10', 'NO2', 'SO2', 'CO', 'O3']
@@ -137,6 +175,7 @@ def display_current_air_quality(air_pollution_data, calculate_all_aqi_values):
     cols = st.columns(3)
     for idx, (name, value) in enumerate(zip(pollutant_names, aqi_values)):
         with cols[idx % 3]:
+            # Get raw concentration (handle PM2.5 naming)
             raw_value = getattr(components, name.lower().replace('.', '_'))
             st.metric(
                 label=name,
@@ -144,9 +183,19 @@ def display_current_air_quality(air_pollution_data, calculate_all_aqi_values):
                 delta=f"Raw: {raw_value:.2f}"
             )
 
+
 def display_aqi_forecast(air_pollution_data, display_name, calculate_all_aqi_values):
-    """Display AQI forecast plot."""
+    """Render AQI forecast chart.
+    
+    Args:
+        air_pollution_data: AirQualityResponse object
+        display_name: Location name
+        calculate_all_aqi_values: AQI calculation function
+    """
     st.subheader("📈 Air Quality Forecast")
-    dates, max_aqi_values = calculate_aqi_over_time(air_pollution_data.list, calculate_all_aqi_values)
+    dates, max_aqi_values = calculate_aqi_over_time(
+        air_pollution_data.list,
+        calculate_all_aqi_values
+    )
     fig = create_aqi_plot(dates, max_aqi_values, display_name)
     st.plotly_chart(fig, use_container_width=True)

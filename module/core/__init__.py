@@ -1,13 +1,14 @@
 """
-Core functionality for the Air Quality Analysis application.
-This package contains the essential components for data fetching,
-processing, and calculations.
+Core Business Logic.
+
+Contains data models, API clients, AQI calculators, and geocoding.
+This layer is independent of the UI framework.
 """
 
 from .air_quality_models import (
     Coordinates,
-    Components,
-    Main,
+    PollutantComponents,
+    AQIInfo,
     AirQualityData,
     AirQualityResponse
 )
@@ -24,8 +25,8 @@ from .visualization import (
 
 __all__ = [
     'Coordinates',
-    'Components',
-    'Main',
+    'PollutantComponents',
+    'AQIInfo',
     'AirQualityData',
     'AirQualityResponse',
     'read_pollution_data_from_api',

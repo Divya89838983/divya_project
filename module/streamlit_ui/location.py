@@ -1,58 +1,51 @@
 """
-Location handling module for the Air Quality Analysis application.
-"""
-import streamlit as st
-import requests
-import pandas as pd
+Location input and display UI components.
 
-def get_coordinates_from_location(location_name):
-    """Get coordinates from location name using Nominatim API."""
-    base_url = "https://nominatim.openstreetmap.org/search"
-    params = {'q': location_name, 'format': 'json', 'limit': 1, 'addressdetails': 1}
-    headers = {'User-Agent': 'AirQualityApp/1.0'}
-    
-    try:
-        response = requests.get(base_url, params=params, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-        
-        if data and len(data) > 0:
-            result = data[0]
-            display_name = result.get('display_name', 'Unknown')
-            lat = float(result['lat'])
-            lon = float(result['lon'])
-            return (lat, lon), display_name
-        return (None, None), None
-    except:
-        return (None, None), None
+Handles user location searches and displays results on an interactive map.
+"""
+
+import streamlit as st
+import pandas as pd
+from module.core.geocoding import get_coordinates_from_location
+
 
 def display_location_info(lat, lon, display_name):
-    """Display location information in the Streamlit UI."""
+    """Show location confirmation and map.
+    
+    Args:
+        lat: Latitude
+        lon: Longitude  
+        display_name: Formatted location name from geocoding service
+    """
     st.success(f"📍 Found location: {display_name}")
     
+    # Create single-point map data
     map_data = pd.DataFrame({
         'lat': [lat],
         'lon': [lon],
-        'size': [100]  # Larger marker size
+        'size': [100]  # Marker size
     })
     st.map(map_data, zoom=11, size='size', use_container_width=True)
 
+
 def get_location_data():
-    """Get location data from user input."""
-    # Initialize session state for location if not exists
+    """Handle location input and validation.
+    
+    Returns:
+        tuple: (lat, lon, display_name) or (None, None, None) if invalid
+    """
+    # Preserve input across reruns
     if 'location_input' not in st.session_state:
         st.session_state.location_input = ""
 
-    # Get location input from user
     location = st.text_input(
         "Enter a location (e.g., 'Ames, IA', 'Paris, France')",
         key="location_input"
     )
     
     if location:
-        # Show loading spinner while fetching coordinates
+        # Show spinner during API call
         with st.spinner("🔍 Searching for location..."):
-            # Get coordinates
             (lat, lon), display_name = get_coordinates_from_location(location)
         
         if lat and lon:

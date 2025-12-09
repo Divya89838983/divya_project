@@ -1,44 +1,48 @@
 """
-Functions for interacting with OpenWeatherMap's Air Quality API.
+OpenWeather Air Pollution API client.
+
+Fetches air quality data and converts JSON responses to typed objects.
 """
 
 import requests
-from .air_quality_models import AirQualityResponse, Coordinates, Components, AirQualityData, Main
+from .air_quality_models import AirQualityResponse, Coordinates, PollutantComponents, AirQualityData, AQIInfo
 from keys import appid
 
+
 def read_pollution_data_from_api(lat, lon):
-    """
-    Fetch air pollution data from OpenWeatherMap API for given coordinates
+    """Fetch air pollution forecast from OpenWeather API.
     
     Args:
-        lat: Latitude
-        lon: Longitude
+        lat: Latitude in decimal degrees
+        lon: Longitude in decimal degrees
     
     Returns:
-        dict: JSON response from the API
+        dict: Raw JSON response from API
     """
     url = f"http://api.openweathermap.org/data/2.5/air_pollution/forecast?lat={lat}&lon={lon}&appid={appid}"
     response = requests.get(url)
-    air_pollution_data_json = response.json()
-    return air_pollution_data_json
+    return response.json()
+
 
 def convert_json_to_object(air_pollution_json_data):
-    """
-    Convert API JSON response to AirQualityResponse object
+    """Convert API JSON to structured AirQualityResponse object.
     
     Args:
-        air_pollution_json_data: JSON data from the API
+        air_pollution_json_data: Raw JSON from API
     
     Returns:
-        AirQualityResponse: Object containing structured air quality data
+        AirQualityResponse: Typed object with coordinates and forecast list
     """
     coord = Coordinates(**air_pollution_json_data["coord"])
+    
+    # Convert each forecast item to typed objects
     air_quality_list = [
         AirQualityData(
             dt=item["dt"],
-            main=Main(**item["main"]),
-            components=Components(**item["components"])
+            main=AQIInfo(**item["main"]),
+            components=PollutantComponents(**item["components"])
         )
         for item in air_pollution_json_data["list"]
     ]
+    
     return AirQualityResponse(coord=coord, list=air_quality_list)

@@ -1,44 +1,40 @@
+"""
+Geocoding service using OpenStreetMap's Nominatim API.
+
+Converts location names to coordinates for air quality lookups.
+"""
+
 import requests
 
+
 def get_coordinates_from_location(location_name):
-    """
-    Get latitude and longitude from location name (e.g., "San Francisco", "Ames, IA", "Paris, France")
-    using OpenStreetMap's Nominatim API
+    """Convert location name to latitude/longitude coordinates.
     
     Args:
-        location_name (str): Location to geocode
+        location_name: City, address, or place name (e.g., "Ames, IA")
     
     Returns:
-        tuple: ((latitude, longitude), display_name) or ((None, None), None) if not found
+        tuple: ((lat, lon), display_name) or ((None, None), None) if not found
     """
-
-    # Nominatim API endpoint
     base_url = "https://nominatim.openstreetmap.org/search"
     
-    # Parameters for the API request
     params = {
         'q': location_name,
         'format': 'json',
-        'limit': 1,
+        'limit': 1,  # Only need best match
         'addressdetails': 1
     }
     
-    # Set a proper User-Agent header (required by Nominatim)
-    headers = {
-        'User-Agent': 'AirQualityApp/1.0'  
-    }
-    
+    # User-Agent required by Nominatim policy
+    headers = {'User-Agent': 'AirQualityApp/1.0'}
 
     try:
-        # Make the API request
         response = requests.get(base_url, params=params, headers=headers)
-        response.raise_for_status()  # Raise an exception for bad status codes
-        
-        # Parse the JSON response
+        response.raise_for_status()
         data = response.json()
         
         if data and len(data) > 0:
-            result = data[0]  # Get the first (best) result
+            result = data[0]
             display_name = result.get('display_name', 'Unknown')
             lat = float(result['lat'])
             lon = float(result['lon'])
@@ -54,9 +50,9 @@ def get_coordinates_from_location(location_name):
         print(f"Error parsing response: {e}")
         return (None, None), None
 
-# Example usage
+
+# Simple test when run directly
 if __name__ == "__main__":
-    # Test with a sample location
     location = "Ames, IA"
     (lat, lon), display_name = get_coordinates_from_location(location)
     

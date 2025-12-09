@@ -1,11 +1,23 @@
 """
-AQI visualization helper functions for the Streamlit UI.
+AQI category display and pollutant detail cards.
+
+Color-codes AQI values according to EPA standards and shows
+individual pollutant measurements.
 """
+
 import streamlit as st
 from ..core.aqi_calculators import calculate_all_aqi_values
 
+
 def get_aqi_category(value):
-    """Get the AQI category and color based on the value."""
+    """Map AQI value to EPA category and display color.
+    
+    Args:
+        value: AQI value (0-500 scale)
+    
+    Returns:
+        tuple: (category_name, hex_color)
+    """
     if value <= 50:
         return "Good", "#00e400"
     elif value <= 100:
@@ -19,18 +31,32 @@ def get_aqi_category(value):
     else:
         return "Hazardous", "#7e0023"
 
+
 def display_aqi_category(value):
-    """Display the AQI category with appropriate styling."""
+    """Show AQI category badge with color-coded background.
+    
+    Args:
+        value: AQI value to categorize
+    """
     category, color = get_aqi_category(value)
+    
+    # Use dark text for light backgrounds
+    text_color = "black" if color in ["#00e400", "#ffff00"] else "white"
+    
     st.markdown(
         f'<div style="padding: 10px; border-radius: 5px; background-color: {color}; '
-        f'color: {"black" if color in ["#00e400", "#ffff00"] else "white"};">'
-        f'AQI Category: {category}</div>',
+        f'color: {text_color};">AQI Category: {category}</div>',
         unsafe_allow_html=True
     )
 
+
 def display_pollutant_details(components, calculate_all_aqi_values):
-    """Display detailed information about each pollutant."""
+    """Show individual pollutant cards with AQI values and categories.
+    
+    Args:
+        components: PollutantComponents object with raw concentrations
+        calculate_all_aqi_values: Function to compute AQI from concentrations
+    """
     st.subheader("📊 Pollutant Details")
     
     aqi_values = calculate_all_aqi_values(components)
@@ -44,9 +70,11 @@ def display_pollutant_details(components, calculate_all_aqi_values):
         "Ozone"
     ]
     
+    # 3-column grid layout
     cols = st.columns(3)
     for idx, (name, value, desc) in enumerate(zip(pollutant_names, aqi_values, descriptions)):
         with cols[idx % 3]:
+            # Get raw concentration (handle PM2.5 -> pm2_5 naming)
             raw_value = getattr(components, name.lower().replace('.', '_'))
             category, color = get_aqi_category(value)
             
