@@ -559,23 +559,36 @@ def test_pm25_calculation():
 
 1. Update `air_quality_models.py`:
    ```python
-   class Components:
+   @dataclass
+   class PollutantComponents:
        pm1_0: float = 0.0  # Add new field
+       # ... existing fields
    ```
 
 2. Add calculator in `aqi_calculators.py`:
    ```python
    def PM1(val):
-       # AQI formula here
+       """Calculate AQI for PM1.0 (ultra-fine particulate matter)."""
+       # Implement EPA AQI formula here
+       if val <= 10:
+           return round(val * 5, 2)
+       # ... more breakpoints
        pass
    ```
 
 3. Update `calculate_all_aqi_values()`:
    ```python
-   return [PM1(components.pm1_0), PM25(...), ...]
+   return [PM1(components.pm1_0), PM25(components.pm2_5), PM10(components.pm10), ...]
    ```
 
-4. Add to UI in `aqi_display.py`
+4. Add to UI in `aqi_display.py`:
+   ```python
+   pollutant_names = ['PM1.0', 'PM2.5', 'PM10', 'NO2', 'SO2', 'CO', 'O3']
+   descriptions = [
+       "Ultra-fine particulate matter (≤1 µm)",
+       # ... other descriptions
+   ]
+   ```
 
 ### 2. Changing API Provider
 
