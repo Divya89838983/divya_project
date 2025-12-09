@@ -372,25 +372,25 @@ See `requirements.txt` for complete list with versions.
 
 ### 1. Location Search Input
 
-![Location Search](images/location_search.png)
+![Location Search](docs/images/location_search.png)
 
 *The main interface with location input box*
 
 ### 2. Location Confirmation with Map
 
-![Location Map](images/location_map.png)
+![Location Map](docs/images/location_map.png)
 
 *Map showing the searched location with confirmation message*
 
 ### 3. Current Air Quality Dashboard
 
-![Air Quality Dashboard](images/air_quality_dashboard.png)
+![Air Quality Dashboard](docs/images/air_quality_dashboard.png)
 
 *Complete dashboard showing individual pollutant cards with AQI values, raw concentrations, color-coded categories, and overall AQI status*
 
 ### 4. Interactive Forecast Chart
 
-![Forecast Chart](images/forecast_chart.png)
+![Forecast Chart](docs/images/forecast_chart.png)
 
 *5-day AQI forecast with interactive Plotly visualization and color-coded zones*
 
